@@ -1,0 +1,70 @@
+services:
+  poll:
+    build: ./poll
+    ports:
+      - "5002:80"
+    networks:
+      - poll-tier
+    env_file:
+      - ".env.redis"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: "redis:7.2-alpine"
+    expose:
+      - "6379"
+    networks:
+      - poll-tier
+      - back-tier
+    env_file:
+      - ".env.redis"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+
+  worker:
+    build: ./worker
+    networks:
+      - back-tier
+    env_file:
+      - ".env.redis"
+      - ".env.postgres"
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  db:
+    image: "postgres:16-alpine"
+    volumes:
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:Z
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - back-tier
+      - result-tier
+    env_file:
+      - ".env.postgres"
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U popey -d popey'"]
+
+  result:
+    build: ./result
+    ports:
+      - "5001:80"
+    networks:
+      - result-tier
+    env_file:
+      - ".env.postgres"
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  poll-tier:
+  result-tier:
+  back-tier:
+
+volumes:
+  db-data:
