@@ -7,7 +7,8 @@ var express = require('express'),
     methodOverride = require('method-override'),
     app = express(),
     server = require('http').Server(app),
-    io = require('socket.io')(server);
+    io = require('socket.io')(server),
+    votesHelper = require('./votes');
 
 var db_uri = "postgres://" + process.env['POSTGRES_USER']
     + ':' + process.env['POSTGRES_PASSWORD']
@@ -47,23 +48,13 @@ async.retry(
 function getVotes(client) {
   client.query('SELECT vote, COUNT(id) AS count FROM votes GROUP BY vote', [])
   .then((result) => {
-    var votes = collectVotesFromResult(result);
+    var votes = votesHelper.collectVotesFromResult(result);
     io.sockets.emit("scores", JSON.stringify(votes));
     setTimeout(function() {getVotes(client) }, 1000);
   }).catch((err) => {
     console.error("Error performing query: " + err);
     setTimeout(function() {getVotes(client) }, 1000);
   });
-}
-
-function collectVotesFromResult(result) {
-  var votes = {a: 0, b: 0, c: 0, d: 0};
-
-  result.rows.forEach(function (row) {
-    votes[row.vote] = parseInt(row.count);
-  });
-
-  return votes;
 }
 
 app.use(cookieParser());
