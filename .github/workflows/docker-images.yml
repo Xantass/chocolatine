@@ -1,0 +1,22 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        directory: ["poll", "result", "worker"]
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image ${{ matrix.directory }}
+      run: docker build ./${{ matrix.directory }} -f ${{ matrix.directory }}/Dockerfile --tag ${{ matrix.directory }}:$(date +%s)
