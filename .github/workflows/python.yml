@@ -4,10 +4,6 @@
 name: Build & Test Python
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_call:
 
 jobs:

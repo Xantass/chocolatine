@@ -4,10 +4,6 @@
 name: Build & Test Node.js
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_call:
 
 jobs:
