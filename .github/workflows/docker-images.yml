@@ -74,7 +74,7 @@ jobs:
 
       - name: 'Debug – identity'
         run: |
-          TOKEN="${{ steps.auth.outputs.access_token }}"
+          TOKEN="${{ steps.auth.outputs.auth_token }}"
           echo "Token length: ${#TOKEN}"
           if [ -z "$TOKEN" ]; then echo "ERROR: token is empty"; exit 1; fi
           echo "Checking identity..."
