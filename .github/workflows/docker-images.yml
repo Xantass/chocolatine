@@ -74,6 +74,9 @@ jobs:
 
       - name: 'Debug – identity'
         run: |
+          TOKEN="${{ steps.auth.outputs.access_token }}"
+          echo "Token length: ${#TOKEN}"
+          if [ -z "$TOKEN" ]; then echo "ERROR: token is empty"; exit 1; fi
           echo "Checking identity..."
           curl -s -H "Authorization: Bearer ${{ steps.auth.outputs.auth_token }}" \
             "https://oauth2.googleapis.com/tokeninfo?access_token=${{ steps.auth.outputs.auth_token }}" | head -20
